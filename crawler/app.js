@@ -4,7 +4,7 @@ var app = require('koa')()
   , views = require('koa-views')
   , onerror = require('koa-onerror');
 
-var index = require('./routes/index');
+var crawler = require('./routes/crawler');
 
 
 // error handler
@@ -29,7 +29,7 @@ app.use(function* (next) {
 app.use(require('koa-static')(__dirname + '/public'));
 
 // routes definition
-app.use(index.routes(), index.allowedMethods());
+app.use(crawler.routes(), crawler.allowedMethods());
 
 // error-handling
 app.on('error', (err, ctx) => {
