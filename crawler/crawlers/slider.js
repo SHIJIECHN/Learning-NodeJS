@@ -17,7 +17,8 @@ crawler({
         cid: $elLink.attr('data-id'),
         href: $elLink.attr('href'),
         title: $elLink.prop('title'),
-        imgUrl: $elLink.find('img').prop('src')
+        imgUrl: $elLink.find('img').prop('src'),
+        imgKey: ''
       }
 
       data.push(dataItem)
