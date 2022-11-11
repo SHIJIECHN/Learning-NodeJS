@@ -1,12 +1,14 @@
 const cp = require('child_process'),
-  { resolve } = require('path');
+  { resolve } = require('path'),
+  nanoId = require('nanoid'),
+  Qiniu = require('qiniu');
 
 module.exports = {
   // 启动进程
   startProcess(options) {
-    // 导入开始爬虫脚本
+    // 拼接路径，导入爬虫脚本：crawlers/silder.js
     const script = resolve(__dirname, options.path),
-      // 子进程
+      // 开启子进程执行script
       child = cp.fork(script, []);
 
     let invoked = false;
@@ -28,5 +30,29 @@ module.exports = {
       invoked = true;
       options.error(err);
     })
+  },
+
+  // 上传图片到七牛云图床
+  qiniuUpload(options) {
+    const mac = new Qiniu.auth.digest.Mac(options.ak, options.sk),
+      conf = new Qiniu.conf.Config(),
+      client = new Qiniu.rs.BucketManager(mac, conf),
+      key = nanoId() + options.ext;
+
+    return new Promise((resolve, reject) => {
+      client.fetch(options.url, options.bucket, key, (error, res, info) => {
+        if (error) {
+          reject(error)
+        } else {
+          if (info.statusCode === 200) {
+            resolve({ key })
+          } else {
+            reject(info)
+          }
+        }
+      })
+    })
   }
 }
+
+

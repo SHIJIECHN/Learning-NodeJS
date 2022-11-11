@@ -1,5 +1,6 @@
 const crawler = require('../libs/crawler.js');
 
+// libs/crawler.js 执行爬虫程序
 // slider 配置参数
 crawler({
   url: 'https://ke.qq.com/cgi-bin/agency?aid=64228#category=-1&tab=0',
