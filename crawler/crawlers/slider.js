@@ -1,9 +1,12 @@
-const crawler = require('../libs/crawler.js');
+// 轮播图
+const Crawler = require('../libs/crawler.js'),
+  { crawler } = require('../config/config.js');
 
 // libs/crawler.js 执行爬虫程序
 // slider 配置参数
-crawler({
-  url: 'https://ke.qq.com/cgi-bin/agency?aid=64228#category=-1&tab=0',
+// 开启爬虫获取轮播图信息
+Crawler({
+  url: crawler.url.main,
   callback() {
     const $ = window.$,
       $item = $('.agency-big-banner-ul .agency-big-banner-li');

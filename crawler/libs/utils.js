@@ -1,7 +1,8 @@
 const cp = require('child_process'),
   { resolve } = require('path'),
   nanoId = require('nanoid'),
-  Qiniu = require('qiniu');
+  Qiniu = require('qiniu'),
+  { qiniu } = require('../config/config.js')
 
 module.exports = {
   // 启动进程
@@ -34,7 +35,8 @@ module.exports = {
 
   // 上传图片到七牛云图床
   qiniuUpload(options) {
-    const mac = new Qiniu.auth.digest.Mac(options.ak, options.sk),
+    // 七牛上传配置
+    const mac = new Qiniu.auth.digest.Mac(qiniu.keys.ak, qiniu.keys.sk),
       conf = new Qiniu.conf.Config(),
       client = new Qiniu.rs.BucketManager(mac, conf),
       key = nanoId() + options.ext;
