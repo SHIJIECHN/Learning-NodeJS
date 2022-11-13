@@ -34,3 +34,5 @@ const AgencyInfo = seq.define('agency_info', {
     allowNull: false
   }
 })
+
+module.exports = AgencyInfo;

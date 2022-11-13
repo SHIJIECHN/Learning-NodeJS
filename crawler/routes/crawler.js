@@ -9,6 +9,7 @@ router.prefix('/crawler');
 
 router.get('/crawl_slider_data', crawlerController.crawlSiderData);
 router.get('/crawl_agency_info', crawlerController.crawlAgencyInfo);
+router.get('/crawl_recom_course', crawlerController.crawlRecomCourse);
 
 
 

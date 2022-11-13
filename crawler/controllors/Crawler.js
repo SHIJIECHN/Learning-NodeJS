@@ -1,5 +1,6 @@
 const { statProcess, startProcess, qiniuUpload } = require('../libs/utils.js'),
   { addSliderData } = require('../services/Slider.js'),
+  { addAgencyInfo } = require('../services/AgencyInfo.js'),
   config = require('../config/config.js')
 
 class Crawler {
@@ -17,8 +18,6 @@ class Crawler {
               const imgData = await qiniuUpload({
                 url: item.imgUrl,
                 bucket: qiniu.bucket.tximg.bucket_name,
-                ak: qiniu.keys.ak,
-                sk: qiniu.keys.sk,
                 ext: '.jpg'
               });
 
@@ -66,10 +65,60 @@ class Crawler {
               data.logoKey = logoData.key;
             }
 
+            const result = await addAgencyInfo(data);
+            if (result) {
+              console.log('Data crate OK');
+            } else {
+              console.log('Data create failed.')
+            }
+
           } catch (e) {
             console.log(e);
           }
         }
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
+
+  async crawlRecomCourse() {
+    startProcess({
+      path: '../crawlers/recomCourse',
+      async message(data) {
+        data.map(async item => {
+          const qiniu = config.qiniu;
+          try {
+            if (item.posterUrl && !item.posterKey) {
+              const posterData = await qiniuUpload({
+                url: item.posterUrl,
+                bucket: qiniu.bucket.tximg.bucket_name,
+                ext: '.jpg'
+              });
+
+              if (posterData.key) {
+                item.posterKey = posterData.key;
+              }
+            }
+            if (item.teacherImg && !item.teacherImgKey) {
+              const teacherImgData = await qiniuUpload({
+                url: item.teacherImg,
+                bucket: qiniu.bucket.tximg.bucket_name,
+                ext: '.jpg'
+              })
+
+              if (teacherImgData.key) {
+                item.teacherImgKey = teacherImgData.key;
+              }
+            }
+          } catch (e) {
+            console.log(e)
+          }
+        })
       },
       async exit(code) {
         console.log(code);
