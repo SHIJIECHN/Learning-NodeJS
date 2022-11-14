@@ -12,7 +12,7 @@ Crawler({
       $item = $('.agency-big-banner-ul .agency-big-banner-li');
 
     let data = [];
-
+    console.log($item)
     $item.each((index, item) => {
       const $el = $(item),
         $elLink = $el.find('.js-banner-btnqq');

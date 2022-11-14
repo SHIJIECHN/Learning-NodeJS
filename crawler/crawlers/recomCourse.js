@@ -15,6 +15,7 @@ Crawler({
         $itemLk = $el.find('a');
 
       const dataItem = {
+        cid: parseInt($el.attr('report-tdw').match(/\&(.+?)\&/)[1].split('=')[1]),
         href: $itemLk.prop('href'),
         mainTitle,
         title: $itemLk.prop('title'),
@@ -22,14 +23,14 @@ Crawler({
         description: $el.find('.spread-course-des').text(),
         teacherImg: $el.find('.spread-course-face img').prop('src'),
         teacherName: $el.find('.spread-course-face span').eq(0).text(),
-        studentCount: $el.find('.spread-course-face span').eq(1).text().replace(/[^0-9]/ig, ''),
+        studentCount: parseInt($el.find('.spread-course-face span').eq(1).text().replace(/[^0-9]/ig, '')),
         price: Number($el.find('spread-origin').text().slice(1)),
         posterKey: '',
         teacherImgKey: ''
       }
-
       data.push(dataItem);
     })
+    console.log(data);
     return data;
   }
 })

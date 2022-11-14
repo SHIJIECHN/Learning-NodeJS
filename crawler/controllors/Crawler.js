@@ -91,6 +91,7 @@ class Crawler {
       path: '../crawlers/recomCourse',
       async message(data) {
         data.map(async item => {
+          console.log(item)
           const qiniu = config.qiniu;
           try {
             if (item.posterUrl && !item.posterKey) {
