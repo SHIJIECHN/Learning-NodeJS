@@ -63,6 +63,12 @@ const RecomCourse = seq.define('recom_course', {
     comment: 'qiniu teacher image name',
     type: STRING,
     allowNull: false
+  },
+  status: {
+    comment: 'recomCourse status',
+    type: INT,
+    defaultValue: 1,
+    allowNull: false
   }
 })
 

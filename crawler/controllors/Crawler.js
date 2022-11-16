@@ -3,13 +3,16 @@ const { statProcess, startProcess, qiniuUpload } = require('../libs/utils.js'),
   { addAgencyInfo } = require('../services/AgencyInfo.js'),
   { addRecomCourse } = require('../services/RecomCourse.js'),
   { addCollection } = require('../services/Collection.js'),
+  { addTeacherData } = require('../services/Teacher.js'),
+  { addStudentData } = require('../services/Student.js'),
+  { addCourseTab } = require('../services/CourseTab.js'),
   { qiniu } = require('../config/config.js')
 
 class Crawler {
   // 轮播图
   crawlSiderData() {
     startProcess({
-      path: '../crawlers/slider',
+      file: 'slider',
       async message(data) {
         data.map(async item => {
           // 由于其中一条数据cid大于int类型的最大值，判断出错，所以截断cid
@@ -51,7 +54,7 @@ class Crawler {
   // 开启子进程执行“获取机构信息”脚本
   crawlAgencyInfo() {
     startProcess({
-      path: '../crawlers/agencyInfo', // 需要执行的脚本路径
+      file: 'agencyInfo', // 需要执行的脚本路径
       async message(data) {
         // data.logonUrl存在并且data.logoKey不存在，在进行七牛上传
         if (data.logoUrl && !data.logoKey) {
@@ -90,7 +93,7 @@ class Crawler {
   // 推荐课程
   async crawlRecomCourse() {
     startProcess({
-      path: '../crawlers/recomCourse',
+      file: 'recomCourse',
       async message(data) {
         data.map(async item => {
           try {
@@ -139,7 +142,7 @@ class Crawler {
   // 精品课程
   async crawlCollection() {
     startProcess({
-      path: '../crawlers/collection',
+      file: 'collection',
       async message(data) {
         data.map(async item => {
           if (item.posterUrl && !item.posterKey) {
@@ -177,34 +180,33 @@ class Crawler {
   // 老师列表
   async crawlTeacher() {
     startProcess({
-      path: '../crawlers/teacher',
+      file: 'teacher',
       async message(data) {
-        console.log(data)
-        // data.map(async item => {
-        //   if (item.teacherImg && !item.teacherImgKey) {
-        //     // console.log(item);
-        //     try {
-        //       const imgData = await qiniuUpload({
-        //         url: item.teacherImg,
-        //         bucket: qiniu.bucket.tximg.bucket_name,
-        //         ext: '.jpg'
-        //       });
+        data.map(async item => {
+          console.log(item);
+          if (item.teacherImg && !item.teacherImgKey) {
+            try {
+              const imgData = await qiniuUpload({
+                url: item.teacherImg,
+                bucket: qiniu.bucket.tximg.bucket_name,
+                ext: '.jpg'
+              });
 
-        //       if (imgData.key) {
-        //         item.teacherImgKey = imgData.key;
-        //       }
-        //     } catch (e) {
-        //       console.log(e)
-        //     }
-        //   }
-        //   //   const result = await addCollection(item);
-        //   //   if (result) {
-        //   //     console.log('Data crate OK');
-        //   //   } else {
-        //   //     console.log('Data create failed.')
-        //   // }
+              if (imgData.key) {
+                item.teacherImgKey = imgData.key;
+              }
+            } catch (e) {
+              console.log(e)
+            }
+          }
+          const result = await addTeacherData(item);
+          if (result) {
+            console.log('Data crate OK');
+          } else {
+            console.log('Data create failed.')
+          }
 
-        // })
+        })
       },
       async exit(code) {
         console.log(code);
@@ -214,6 +216,72 @@ class Crawler {
       }
     })
   }
+  // 优秀学员
+  async crawlStudent() {
+    startProcess({
+      file: 'student',
+      async message(data) {
+        data.map(async item => {
+          if (item.studentImg && !item.studentImgKey) {
+            try {
+              const imgData = await qiniuUpload({
+                url: item.studentImg,
+                bucket: qiniu.bucket.tximg.bucket_name,
+                ext: '.jpg'
+              });
+
+              if (imgData.key) {
+                item.studentImgKey = imgData.key;
+              }
+
+            } catch (e) {
+              console.log(e)
+            }
+          }
+          console.log(item);
+          const result = await addStudentData(item);
+          if (result) {
+            console.log('Data crate OK');
+          } else {
+            console.log('Data create failed.')
+          }
+
+        })
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
+  // Tab
+  async crawlCourseTab() {
+    startProcess({
+      file: 'courseTab',
+      async message(data) {
+        data.map(async item => {
+          console.log(item)
+
+          const result = await addCourseTab(item);
+          if (result) {
+            console.log('Data crate OK');
+          } else {
+            console.log('Data create failed.')
+          }
+
+        })
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
+
 }
 
 module.exports = new Crawler();

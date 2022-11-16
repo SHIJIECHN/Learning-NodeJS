@@ -8,7 +8,7 @@ module.exports = {
   // 启动进程
   startProcess(options) {
     // 拼接路径，导入爬虫脚本：crawlers/silder.js
-    const script = resolve(__dirname, options.path),
+    const script = resolve(__dirname, '../crawlers/' + options.file),
       // 开启子进程执行script
       child = cp.fork(script, []);
 

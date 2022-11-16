@@ -37,6 +37,12 @@ const Collection = seq.define('collection', {
     comment: 'qiniu poster image name',
     type: STRING,
     allowNull: false
+  },
+  status: {
+    comment: 'collection status',
+    type: INT,
+    defaultValue: 1,
+    allowNull: false
   }
 })
 
