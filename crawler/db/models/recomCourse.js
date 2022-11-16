@@ -14,7 +14,7 @@ const RecomCourse = seq.define('recom_course', {
     type: STRING,
     allowNull: false
   },
-  mailTitle: {
+  mainTitle: {
     comment: 'page category title',
     type: STRING,
     allowNull: false

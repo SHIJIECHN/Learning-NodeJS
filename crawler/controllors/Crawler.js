@@ -1,9 +1,12 @@
 const { statProcess, startProcess, qiniuUpload } = require('../libs/utils.js'),
   { addSliderData } = require('../services/Slider.js'),
   { addAgencyInfo } = require('../services/AgencyInfo.js'),
-  config = require('../config/config.js')
+  { addRecomCourse } = require('../services/RecomCourse.js'),
+  { addCollection } = require('../services/Collection.js'),
+  { qiniu } = require('../config/config.js')
 
 class Crawler {
+  // 轮播图
   crawlSiderData() {
     startProcess({
       path: '../crawlers/slider',
@@ -13,7 +16,6 @@ class Crawler {
           item.cid = parseInt(item.cid.toString().slice(0, 6));
 
           if (item.imgUrl && !item.imgKey) {
-            const qiniu = config.qiniu;
             try {
               const imgData = await qiniuUpload({
                 url: item.imgUrl,
@@ -45,6 +47,7 @@ class Crawler {
     })
   }
 
+  // 机构信息
   // 开启子进程执行“获取机构信息”脚本
   crawlAgencyInfo() {
     startProcess({
@@ -52,7 +55,6 @@ class Crawler {
       async message(data) {
         // data.logonUrl存在并且data.logoKey不存在，在进行七牛上传
         if (data.logoUrl && !data.logoKey) {
-          const qiniu = config.qiniu;
           try {
             // 图片上传七牛
             const logoData = await qiniuUpload({
@@ -85,14 +87,12 @@ class Crawler {
       }
     })
   }
-
+  // 推荐课程
   async crawlRecomCourse() {
     startProcess({
       path: '../crawlers/recomCourse',
       async message(data) {
         data.map(async item => {
-          console.log(item)
-          const qiniu = config.qiniu;
           try {
             if (item.posterUrl && !item.posterKey) {
               const posterData = await qiniuUpload({
@@ -116,10 +116,95 @@ class Crawler {
                 item.teacherImgKey = teacherImgData.key;
               }
             }
+            console.log(item)
+            const result = await addRecomCourse(item);
+            if (result) {
+              console.log('Data crate OK');
+            } else {
+              console.log('Data create failed.')
+            }
           } catch (e) {
             console.log(e)
           }
         })
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
+  // 精品课程
+  async crawlCollection() {
+    startProcess({
+      path: '../crawlers/collection',
+      async message(data) {
+        data.map(async item => {
+          if (item.posterUrl && !item.posterKey) {
+            try {
+              const posterData = await qiniuUpload({
+                url: item.posterUrl,
+                bucket: qiniu.bucket.tximg.bucket_name,
+                ext: '.jpg'
+              });
+
+              if (posterData.key) {
+                item.posterKey = posterData.key;
+              }
+            } catch (e) {
+              console.log(e)
+            }
+          }
+          const result = await addCollection(item);
+          if (result) {
+            console.log('Data crate OK');
+          } else {
+            console.log('Data create failed.')
+          }
+
+        })
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
+  // 老师列表
+  async crawlTeacher() {
+    startProcess({
+      path: '../crawlers/teacher',
+      async message(data) {
+        console.log(data)
+        // data.map(async item => {
+        //   if (item.teacherImg && !item.teacherImgKey) {
+        //     // console.log(item);
+        //     try {
+        //       const imgData = await qiniuUpload({
+        //         url: item.teacherImg,
+        //         bucket: qiniu.bucket.tximg.bucket_name,
+        //         ext: '.jpg'
+        //       });
+
+        //       if (imgData.key) {
+        //         item.teacherImgKey = imgData.key;
+        //       }
+        //     } catch (e) {
+        //       console.log(e)
+        //     }
+        //   }
+        //   //   const result = await addCollection(item);
+        //   //   if (result) {
+        //   //     console.log('Data crate OK');
+        //   //   } else {
+        //   //     console.log('Data create failed.')
+        //   // }
+
+        // })
       },
       async exit(code) {
         console.log(code);
