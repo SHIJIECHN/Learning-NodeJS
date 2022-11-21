@@ -4,7 +4,9 @@ const Slider = require('./slider.js'),
   Collection = require('./collection.js'),
   Teacher = require('./teacher.js'),
   Student = require('./student.js'),
-  CourseTab = require('./courseTab.js');
+  CourseTab = require('./courseTab.js'),
+  Course = require('./course.js'),
+  Aboutus = require('./aboutus.js');
 
 module.exports = {
   Slider,
@@ -13,5 +15,7 @@ module.exports = {
   Collection,
   Teacher,
   Student,
-  CourseTab
+  CourseTab,
+  Course,
+  Aboutus
 }

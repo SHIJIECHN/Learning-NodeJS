@@ -6,6 +6,8 @@ const { statProcess, startProcess, qiniuUpload } = require('../libs/utils.js'),
   { addTeacherData } = require('../services/Teacher.js'),
   { addStudentData } = require('../services/Student.js'),
   { addCourseTab } = require('../services/CourseTab.js'),
+  { addCourseData } = require('../services/Course.js'),
+  { addAboutus } = require('../services/Aboutus.js'),
   { qiniu } = require('../config/config.js')
 
 class Crawler {
@@ -90,6 +92,45 @@ class Crawler {
       }
     })
   }
+
+  // 关于我们
+  async crawlAboutus() {
+    startProcess({
+      file: 'aboutus', // 需要执行的脚本路径
+      async message(data) {
+        if (data.posterUrl && !data.posterKey) {
+          try {
+            // 图片上传七牛
+            const posterData = await qiniuUpload({
+              url: data.posterUrl,
+              bucket: qiniu.bucket.tximg.bucket_name,
+              ext: '.jpg'
+            })
+
+            if (posterData.key) {
+              data.posterKey = posterData.key;
+            }
+
+            const result = await addAboutus(data);
+            if (result) {
+              console.log('Data crate OK');
+            } else {
+              console.log('Data create failed.')
+            }
+
+          } catch (e) {
+            console.log(e);
+          }
+        }
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
   // 推荐课程
   async crawlRecomCourse() {
     startProcess({
@@ -119,7 +160,6 @@ class Crawler {
                 item.teacherImgKey = teacherImgData.key;
               }
             }
-            console.log(item)
             const result = await addRecomCourse(item);
             if (result) {
               console.log('Data crate OK');
@@ -183,7 +223,6 @@ class Crawler {
       file: 'teacher',
       async message(data) {
         data.map(async item => {
-          console.log(item);
           if (item.teacherImg && !item.teacherImgKey) {
             try {
               const imgData = await qiniuUpload({
@@ -238,7 +277,6 @@ class Crawler {
               console.log(e)
             }
           }
-          console.log(item);
           const result = await addStudentData(item);
           if (result) {
             console.log('Data crate OK');
@@ -262,9 +300,48 @@ class Crawler {
       file: 'courseTab',
       async message(data) {
         data.map(async item => {
-          console.log(item)
-
           const result = await addCourseTab(item);
+          if (result) {
+            console.log('Data crate OK');
+          } else {
+            console.log('Data create failed.')
+          }
+
+        })
+      },
+      async exit(code) {
+        console.log(code);
+      },
+      async error(error) {
+        console.log(error)
+      }
+    })
+  }
+
+  async crawlCourseData() {
+    startProcess({
+      file: 'course',
+      async message(data) {
+        data.map(async item => {
+          console.log(item)
+          if (item.posterUrl && !item.posterKey) {
+            try {
+              const posterData = await qiniuUpload({
+                url: item.posterUrl,
+                bucket: qiniu.bucket.tximg.bucket_name,
+                ext: '.jpg'
+              });
+
+              if (posterData.key) {
+                item.posterKey = posterData.key;
+              }
+              console.log(item)
+
+            } catch (e) {
+              console.log(e)
+            }
+          }
+          const result = await addCourseData(item);
           if (result) {
             console.log('Data crate OK');
           } else {
